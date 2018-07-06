@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="fabric.min.js"></script>
+    <script src="FileSaver.js"></script>
+    <script src="canvas-toblob.js"></script>
+</head>
+<body>
+    <canvas id="c" height="500" width="1200"></canvas>
+    <button id="goRight">Go Right</button>
+    <input type="file" id="imageLoader" name="imageLoader" />
+    <button id="lnkDownload">Download image</a>
+    <!-- <button id="myImage">Download Image</button> -->
+<script>
+    var canvas = new fabric.Canvas('c',{backgroundColor : "lightgrey"});
+
+    var rect = new fabric.Rect({
+        left: 700,
+        top: 0,
+        fill: 'red',
+        width: 100,
+        height: 100,
+        // selectable: false,
+        angle: 45
+    });
+
+    canvas.add(rect);
+
+    $("#goRight").click(function() {
+        // console.log(rect.get('left'));
+        
+        rect.set('left',rect.get('left') + 50);
+        canvas.renderAll();
+    });
+
+    //adding image
+    // var imgElement = document.getElementById('my-image');
+    // var imgInstance = new fabric.Image(imgElement, {
+    //     left: 100,
+    //     top: 100
+    //     // opacity: 0.85
+    // });
+    // canvas.add(imgInstance);
+
+    fabric.Image.fromURL('img.jpg', function(img){
+        img.set('width',200);
+        img.set('height',200);
+        canvas.add(img);  
+        img.on('modified', function(){
+            console.log('modified');            
+        });      
+    });
+    //download image
+    // $("#myImage").click(function() {
+    //     $("c").get(0).toBlob(function(blob){
+    //         saveAs(blob, "myImage.png");
+    //     });
+    // });
+
+    // load image in canvas    
+    var imageLoader = document.getElementById('imageLoader');
+    imageLoader.addEventListener('change', handleImage, false);
+
+    function handleImage(e) {
+        var objects = canvas.getObjects();
+        for (var i in objects) {
+            objects[i].remove();
+        }
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            var img = new Image();
+            img.onload = function () {
+                var imgInstance = new fabric.Image(img, {
+                    selectable: 1
+                })
+                canvas.add(imgInstance);
+                canvas.deactivateAll().renderAll();
+            }
+            img.src = event.target.result;
+        }
+        reader.readAsDataURL(e.target.files[0]);
+    }
+
+
+    // image download
+    var imageSaver = document.getElementById('lnkDownload');
+    imageSaver.addEventListener('click', saveImage, false);
+
+    function saveImage(e) {
+        this.href = canvas.toDataURL({
+            format: 'png',
+            quality: 0.8
+        });
+        this.download = 'canvas.png'
+    }
+
+    // add text to canvas
+    var text = new fabric.Text('hello world', 
+    { 
+        left: 200, 
+        top: 250,
+        fontStyle: 'italic',
+        fontFamily: 'Hoefler Text' 
+    });
+    canvas.add(text);
+
+    // groups
+    var circle = new fabric.Circle({
+        radius: 100,
+        fill: '#eef',
+        scaleY: 0.5,
+        originX: 'center',
+        originY: 'center'
+    });
+
+    var text = new fabric.Text('hello world', {
+        fontSize: 30,
+        originX: 'center',
+        originY: 'center'
+    });
+
+    var group = new fabric.Group([ circle, text ], {
+        left: 500,
+        top: 200,
+        angle: -10
+    });
+
+    canvas.add(group);
+</script>
+</body>
+</html>
